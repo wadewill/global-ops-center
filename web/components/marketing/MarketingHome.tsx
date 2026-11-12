@@ -1,12 +1,19 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import ValueCalculator from "./ValueCalculator";
 import styles from "./MarketingHome.module.css";
 
 const categories = ["全部商品", "服饰鞋包", "家居生活", "数码配件"] as const;
 type Category = typeof categories[number];
+const navigation = [
+  { id: "home", label: "首页" },
+  { id: "catalog", label: "商品示例" },
+  { id: "services", label: "商家工具" },
+  { id: "example", label: "效果对比" },
+  { id: "value", label: "收益测算" },
+] as const;
 const products = [
   { id: "shoe", name: "米白轻量运动鞋", category: "服饰鞋包", image: "/images/storefront/sneaker.webp", alt: "米白色运动鞋示意商品图", tag: "变体检查", issue: "同款不同尺码，缺少分组", field: "item_group_id", value: "未填写", severity: "中优先级", rule: "VARIANT_GROUP_MISSING", action: "给同一款商品的不同尺码填写相同的 item_group_id，并为每个尺码保留独立 SKU。", keywords: "运动鞋 鞋子 尺码 颜色 SKU 变体 分组" },
   { id: "mug", name: "日用陶瓷咖啡杯套装", category: "家居生活", image: "/images/storefront/mugs.webp", alt: "白色和浅棕色陶瓷咖啡杯示意商品图", tag: "价格检查", issue: "有商品、有图片，价格却是 0", field: "price", value: "0", severity: "高优先级", rule: "PRICE_INVALID", action: "确认商品的实际售价，在原始数据中填写大于 0 的有效价格，再重新运行诊断。", keywords: "杯子 咖啡 陶瓷 家居 价格 异常" },
@@ -26,6 +33,32 @@ function ServiceIcon({ kind }: { kind: "check" | "report" | "task" | "api" }) {
 }
 
 export default function MarketingHome() {
+  const [activeSection, setActiveSection] = useState<string>("home");
+  useEffect(() => {
+    let frame = 0;
+    function updateSection() {
+      frame = 0;
+      let current: string = "home";
+      for (const item of navigation) {
+        const target = document.getElementById(item.id);
+        if (target && target.getBoundingClientRect().top <= 100) current = item.id;
+      }
+      setActiveSection(current);
+    }
+    function scheduleUpdate() {
+      if (!frame) frame = window.requestAnimationFrame(updateSection);
+    }
+    updateSection();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("hashchange", scheduleUpdate);
+    window.addEventListener("resize", scheduleUpdate);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("hashchange", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+    };
+  }, []);
   const [category, setCategory] = useState<Category>("全部商品");
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
@@ -40,9 +73,9 @@ export default function MarketingHome() {
   }
   function search(event: FormEvent) { event.preventDefault(); findExamples(draft); }
 
-  return <div className={styles.page} lang="zh-CN">
+  return <div id="home" className={styles.page} lang="zh-CN">
     <a className={styles.skip} href="#main">跳到正文</a>
-    <div className={styles.utility}><div><span>ListingScore 商家服务</span><nav aria-label="快捷导航"><Link href="/zh">我的工作空间</Link><a href="#help">帮助中心</a><Link href="/en">English</Link></nav></div></div>
+    <div className={styles.utility}><div><span>ListingScore 商家服务</span><nav aria-label="快捷导航"><Link href="/zh">我的个人中心</Link><a href="#help">帮助中心</a><Link href="/en">English</Link></nav></div></div>
     <header className={styles.header}>
       <Link href="/" className={styles.logo} aria-label="ListingScore 产品首页"><b>LS</b><span>ListingScore<small>商品检查 · 运营工具</small></span></Link>
       <div className={styles.searchArea}>
@@ -51,7 +84,7 @@ export default function MarketingHome() {
       </div>
       <Link href="/zh?tab=diagnosis" className={styles.headerAction}><ServiceIcon kind="check" />检查我的商品</Link>
     </header>
-    <div className={styles.navBar}><nav aria-label="首页导航"><a className={styles.categoryNav} href="#catalog">商品检查分类 <span aria-hidden="true">☰</span></a><a className={styles.activeNav} href="#main">首页</a><a href="#catalog">商品示例</a><a href="#services">商家工具</a><a href="#example">效果对比</a><a href="#value">收益测算</a></nav></div>
+    <div className={styles.navBar}><nav aria-label="首页导航"><a className={styles.categoryNav} href="#catalog">商品检查分类 <span aria-hidden="true">☰</span></a>{navigation.map(item => <a key={item.id} href={`#${item.id}`} className={activeSection === item.id ? styles.activeNav : undefined} aria-current={activeSection === item.id ? "location" : undefined}>{item.label}</a>)}<Link className={styles.workspaceNav} href="/zh">个人中心</Link></nav></div>
 
     <main id="main" className={styles.main}>
       <div className={styles.showcase}>
@@ -98,6 +131,6 @@ export default function MarketingHome() {
       <section id="help" className={styles.help}><div className={styles.sectionHeading}><h2>使用前，你可能想了解</h2><span>帮助中心</span></div><div className={styles.faqGrid}>{faqs.map(([question,answer]) => <details key={question}><summary>{question}<span aria-hidden="true">＋</span></summary><p>{answer}</p></details>)}</div></section>
       <section className={styles.bottomBanner}><div><h2>下一次上新，先把商品检查一遍。</h2><p>找到问题，拿到建议，开始处理。</p></div><Link href="/zh?tab=diagnosis" className={styles.primary}>免费检查我的商品</Link></section>
     </main>
-    <footer className={styles.footer}><div><Link href="/" className={styles.footerLogo}>ListingScore</Link><span>商品检查 · 运营工具</span><nav aria-label="页脚导航"><Link href="/zh">中文工作空间</Link><Link href="/en">English workspace</Link><a href="#help">使用帮助</a><a href="#main">返回顶部 ↑</a></nav></div><p>当前提供商品诊断与修复任务管理。平台自动同步、团队分派与在线订阅仍在规划中。</p></footer>
+    <footer className={styles.footer}><div><Link href="/" className={styles.footerLogo}>ListingScore</Link><span>商品检查 · 运营工具</span><nav aria-label="页脚导航"><Link href="/zh">中文个人中心</Link><Link href="/en">English workspace</Link><a href="#help">使用帮助</a><a href="#home">返回顶部 ↑</a></nav></div><p>当前提供商品诊断与修复任务管理。平台自动同步、团队分派与在线订阅仍在规划中。</p></footer>
   </div>;
 }

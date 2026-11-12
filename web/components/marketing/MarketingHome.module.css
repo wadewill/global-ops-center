@@ -3,7 +3,7 @@
 :where(.page) :where(a:hover) { color: var(--shop-red); }
 .page button { font-family: inherit; }
 .page a:focus-visible, .page button:focus-visible, .page summary:focus-visible { outline: 2px solid #bf3518; outline-offset: 3px; }
-.page section, .page main { scroll-margin-top: 18px; }
+.page section, .page main { scroll-margin-top: 60px; }
 .srOnly, .skip { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .skip:focus { width: auto; height: auto; clip-path: none; left: 15px; top: 10px; z-index: 10; padding: 10px; background: white; }
 .utility { background: #ededed; border-bottom: 1px solid #e5e5e5; color: #777; font-size: 11px; }
@@ -24,11 +24,12 @@
 .hotSearch button:hover { color: var(--shop-red); }
 .headerAction { display: flex; align-items: center; gap: 8px; font-size: 12px; border: 1px solid #ddd; padding: 12px 14px; border-radius: 3px; background: white; white-space: nowrap; }
 .headerAction svg { width: 18px; height: 18px; color: var(--shop-red); }
-.navBar { background: #fff; border-bottom: 2px solid var(--shop-red); }
+.navBar { position: sticky; top: 0; z-index: 10; background: #fff; border-bottom: 2px solid var(--shop-red); }
 .navBar>nav { display: flex; align-items: center; gap: 34px; max-width: 1200px; margin: auto; height: 42px; font-size: 14px; font-weight: 600; }
 .navBar .categoryNav { width: 174px; flex: 0 0 174px; display: flex; justify-content: space-between; align-items: center; align-self: stretch; padding: 0 17px; background: var(--shop-red); color: #fff; font-size: 13px; }
 .categoryNav span { font-size: 15px; font-weight: 400; }
 .navBar .activeNav { color: var(--shop-red); }
+.navBar .workspaceNav { margin-left: auto; color: #c54221; }
 .main { max-width: 1200px; margin: auto; padding-bottom: 35px; }
 .showcase { display: grid; grid-template-columns: 174px minmax(0,1fr) 228px; gap: 12px; padding-top: 12px; }
 .categoryMenu { padding: 17px 13px; background: white; border: 1px solid #ececec; border-radius: 4px; }
@@ -201,6 +202,7 @@
   .hotSearch { gap: 13px; margin-top: 8px; }
   .navBar>nav { margin: 0 16px; gap: 0; justify-content: space-between; height: 40px; font-size: 12px; }
   .navBar .categoryNav { display: none; }
+  .navBar .workspaceNav { margin-left: 0; }
   .main { margin: 0 14px; }
   .showcase { grid-template-columns: 1fr; padding-top: 10px; }
   .categoryMenu { display: none; }

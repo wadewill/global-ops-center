@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import WorkspaceHeader from "./components/WorkspaceHeader";
+import { workspaceHref, workspaceReturnPath, workspaceTab } from "./workspace-navigation";
 import "./zh.css";
 
 type User = { id: string; email: string; displayName: string; role: string };
@@ -13,32 +14,63 @@ type Connection = { id: string; platform: string; label: string; authType: strin
 const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080";
 
 export default function ChineseWorkspace() {
-  return <Suspense fallback={<><WorkspaceHeader active="overview" /><p role="status">正在加载工作空间…</p></>}><WorkspaceContent /></Suspense>;
+  return <Suspense fallback={<><WorkspaceHeader active="overview" /><main className="zh-shell"><div className="zh-content zh-loading" role="status">正在加载工作空间…</div></main></>}><WorkspaceContent /></Suspense>;
 }
 
 function WorkspaceContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const selected = searchParams.get("tab");
-  const section = selected === "diagnosis" || selected === "connections" ? selected : "overview";
+  const section = workspaceTab(searchParams.get("tab"));
+  const returnTo = workspaceReturnPath(searchParams.get("next"));
   const tab = section === "diagnosis" ? "诊断" : section === "connections" ? "连接" : "概览";
   function setTab(next: "概览" | "诊断" | "连接") {
-    router.push(next === "概览" ? "/zh" : `/zh?tab=${next === "诊断" ? "diagnosis" : "connections"}`);
+    router.push(workspaceHref(next === "概览" ? "overview" : next === "诊断" ? "diagnosis" : "connections"));
   }
   const [token, setToken] = useState<string | null>(null); const [user, setUser] = useState<User | null>(null); const [reports, setReports] = useState<Report[]>([]); const [connections, setConnections] = useState<Connection[]>([]);
   const [sessionReady, setSessionReady] = useState(false);
+  const [sessionError, setSessionError] = useState("");
+  const [dataError, setDataError] = useState("");
+  const [reload, setReload] = useState(0);
   useEffect(() => { const saved = localStorage.getItem("listingscore-token"); if (saved) setToken(saved); setSessionReady(true); }, []);
-  useEffect(() => { if (!token) return; Promise.all([call<User>("/api/v1/auth/me", token), call<Report[]>("/api/v1/imports", token), call<Connection[]>("/api/v1/connections", token)]).then(([me, history, linked]) => { setUser(me); setReports(history); setConnections(linked); }).catch(signOut); }, [token]);
-  function signOut() { localStorage.removeItem("listingscore-token"); setToken(null); setUser(null); }
-  if (!sessionReady || (token && !user)) return <><WorkspaceHeader active={section} /><p role="status">正在加载工作空间…</p></>;
-  if (!token || !user) return <ChineseAuth onSuccess={(nextToken, nextUser) => { localStorage.setItem("listingscore-token", nextToken); setToken(nextToken); setUser(nextUser); }} />;
-  return <><WorkspaceHeader active={section} displayName={user.displayName} onSignOut={signOut} /><main className="zh-shell"><section className="zh-content">{tab === "概览" && <Overview reports={reports} connections={connections} onDiagnose={() => setTab("诊断")} onConnect={() => setTab("连接")} />}{tab === "诊断" && <Diagnosis token={token} reports={reports} setReports={setReports} />}{tab === "连接" && <Connections token={token} items={connections} setItems={setConnections} />}</section></main></>;
+  useEffect(() => {
+    if (!token) return;
+    let current = true;
+    setSessionError("");
+    setDataError("");
+    async function loadWorkspace() {
+      try {
+        const me = await call<User>("/api/v1/auth/me", token!);
+        if (!current) return;
+        setUser(me);
+        const [history, linked] = await Promise.allSettled([call<Report[]>("/api/v1/imports", token!), call<Connection[]>("/api/v1/connections", token!)]);
+        if (!current) return;
+        if (history.status === "fulfilled") setReports(history.value);
+        if (linked.status === "fulfilled") setConnections(linked.value);
+        if (history.status === "rejected" || linked.status === "rejected") setDataError("部分工作空间数据未能加载，请重试。");
+      } catch (cause) {
+        if (!current) return;
+        if (cause instanceof ApiError && cause.status === 401) signOut();
+        else setSessionError("暂时无法读取账号信息，请重试。你的登录状态已保留。");
+      }
+    }
+    void loadWorkspace();
+    return () => { current = false; };
+  }, [token, reload]);
+  useEffect(() => {
+    if (token && user && returnTo) router.replace(returnTo);
+  }, [token, user, returnTo, router]);
+  function signOut() { localStorage.removeItem("listingscore-token"); setToken(null); setUser(null); setReports([]); setConnections([]); setSessionError(""); setDataError(""); }
+  const active = returnTo === "/zh/tasks" ? "tasks" : section;
+  if (sessionError && token) return <><WorkspaceHeader active={active} onSignOut={signOut} /><main className="zh-shell"><div className="zh-content"><section className="zh-panel zh-session-error"><p role="alert">{sessionError}</p><button className="zh-primary" onClick={() => setReload(value => value + 1)}>重新加载</button></section></div></main></>;
+  if (!sessionReady || (token && !user) || (token && user && returnTo)) return <><WorkspaceHeader active={active} /><main className="zh-shell"><div className="zh-content zh-loading" role="status">正在加载工作空间…</div></main></>;
+  if (!token || !user) return <><WorkspaceHeader active={active} /><ChineseAuth key={searchParams.get("mode")} loginFirst={searchParams.get("mode") === "login"} onSuccess={(nextToken, nextUser) => { localStorage.setItem("listingscore-token", nextToken); setToken(nextToken); setUser(nextUser); }} /></>;
+  return <><WorkspaceHeader active={section} displayName={user.displayName} onSignOut={signOut} /><main className="zh-shell"><section className="zh-content">{dataError && <div className="zh-error zh-data-error" role="alert">{dataError}<button type="button" onClick={() => setReload(value => value + 1)}>重新加载</button></div>}{tab === "概览" && <Overview reports={reports} connections={connections} onDiagnose={() => setTab("诊断")} onConnect={() => setTab("连接")} />}{tab === "诊断" && <Diagnosis token={token} reports={reports} setReports={setReports} />}{tab === "连接" && <Connections token={token} items={connections} setItems={setConnections} />}</section></main></>;
 }
 
-function ChineseAuth({ onSuccess }: { onSuccess: (token: string, user: User) => void }) {
-  const [register, setRegister] = useState(true); const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
+function ChineseAuth({ loginFirst, onSuccess }: { loginFirst: boolean; onSuccess: (token: string, user: User) => void }) {
+  const [register, setRegister] = useState(!loginFirst); const [name, setName] = useState(""); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
   async function submit(event: FormEvent) { event.preventDefault(); setBusy(true); setError(""); try { const body = await call<{ accessToken: string; user: User }>(`/api/v1/auth/${register ? "register" : "login"}`, undefined, { method: "POST", body: JSON.stringify({ email, password, displayName: register ? name : undefined }) }); onSuccess(body.accessToken, body.user); } catch (cause) { setError(errorMessage(cause)); } finally { setBusy(false); } }
-  return <main className="zh-auth"><section className="zh-auth-hero"><a href="/" className="zh-logo"><i>✦</i> ListingScore</a><div><p>跨平台商品运营控制台</p><h1>让商品问题<br/>变成增长动作。</h1><span>连接店铺和数据接口，统一识别目录风险、跟踪修复任务，并为后续平台同步做好准备。</span></div><small>English interface: <a href="/en">Open English workspace</a></small></section><section className="zh-auth-form"><form onSubmit={submit}><p>{register ? "创建工作空间" : "欢迎回来"}</p><h2>{register ? "开始使用 ListingScore" : "登录你的工作空间"}</h2>{register && <label>姓名或团队名称<input value={name} onChange={(e) => setName(e.target.value)} required minLength={2} placeholder="例如：Wade 的运营团队" /></label>}<label>邮箱<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="name@company.com" /></label><label>密码<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={12} placeholder="至少 12 位，包含字母和数字" /><small>注册受频率保护，保障工作空间安全。</small></label>{error && <div className="zh-error">{error}</div>}<button className="zh-primary" disabled={busy}>{busy ? "处理中…" : register ? "创建并进入工作空间" : "登录"}</button><button type="button" className="zh-switch" onClick={() => { setRegister(!register); setError(""); }}>{register ? "已有账号？去登录" : "还没有账号？创建工作空间"}</button></form></section></main>;
+  return <main className="zh-auth"><section className="zh-auth-hero"><a href="/" className="zh-logo"><i aria-hidden="true">LS</i> ListingScore</a><div><p>商家服务 · 我的工作空间</p><h1>商品先检查，<br/>上架更从容。</h1><span>查看商品数据问题和修复建议，保存诊断报告，逐项跟进处理进度。</span></div><small>English interface: <a href="/en">Open English workspace</a></small></section><section className="zh-auth-form"><form onSubmit={submit}><p>{register ? "创建工作空间" : "欢迎回来"}</p><h2>{register ? "开始使用 ListingScore" : "登录你的工作空间"}</h2>{register && <label>姓名或团队名称<input value={name} onChange={(e) => setName(e.target.value)} required minLength={2} placeholder="例如：Wade 的运营团队" /></label>}<label>邮箱<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="name@company.com" /></label><label>密码<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={12} placeholder="至少 12 位，包含字母和数字" /><small>注册受频率保护，保障工作空间安全。</small></label>{error && <div className="zh-error">{error}</div>}<button className="zh-primary" disabled={busy}>{busy ? "处理中…" : register ? "创建并进入工作空间" : "登录"}</button><button type="button" className="zh-switch" onClick={() => { setRegister(!register); setError(""); }}>{register ? "已有账号？去登录" : "还没有账号？创建工作空间"}</button></form></section></main>;
 }
 
 function Overview({ reports, connections, onDiagnose, onConnect }: { reports: Report[]; connections: Connection[]; onDiagnose: () => void; onConnect: () => void }) { const score = reports[0]?.catalogScore; const avg = reports.length ? Math.round(reports.reduce((sum, item) => sum + item.catalogScore, 0) / reports.length) : "—"; const ready = connections.length > 0; return <><section className="zh-hero"><div><p>商品运营控制台</p><h1>{ready ? "让已连接的数据源持续产出动作" : "从连接商品数据源开始"}</h1><span>{ready ? "目录异常会沉淀为修复任务，让团队可以按优先级完成处理。" : "先安全连接 Shopify 或自定义 API；CSV 诊断保留为快速体验和补充检查入口。"}</span><div className="zh-hero-actions"><button className="zh-primary" onClick={onConnect}>{ready ? "管理数据连接 →" : "连接数据源 →"}</button><button className="zh-secondary" onClick={onDiagnose}>使用 CSV 快速诊断</button></div></div><div className="zh-score"><b>{score ?? "—"}</b><span>/ 100<br/>最近一次评分</span></div></section><div className="zh-metrics"><Metric title="已完成诊断" value={String(reports.length)} note="历史报告私密保存" /><Metric title="平均健康分" value={String(avg)} note="基于历史诊断" /><Metric title="已连接来源" value={String(connections.length)} note="API 凭据加密保存" /></div><section className="zh-panel"><div className="zh-title"><div><p>最近活动</p><h2>目录诊断报告</h2></div><button onClick={onDiagnose}>新建诊断</button></div>{reports.length ? reports.slice(0, 6).map((item) => <div className="zh-report" key={item.importId}><div><strong>{item.sourceName}</strong><span>{item.totalRows} 个商品 · {new Date(item.createdAt).toLocaleDateString("zh-CN")}</span></div><b>{item.catalogScore}</b><small>质量分</small></div>) : <div className="zh-empty"><b>还没有诊断报告</b><span>先连接平台数据源；也可上传 CSV，快速体验商品问题识别与修复任务。</span><button className="zh-inline-button" onClick={onDiagnose}>使用 CSV 快速诊断</button></div>}</section></> }
@@ -48,6 +80,9 @@ function Diagnosis({ token, reports, setReports }: { token: string; reports: Rep
 
 function Connections({ token, items, setItems }: { token: string; items: Connection[]; setItems: (next: Connection[]) => void }) { const [label, setLabel] = useState(""); const [platform, setPlatform] = useState("SHOPIFY"); const [credential, setCredential] = useState(""); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(""); async function save(event: FormEvent) { event.preventDefault(); setBusy(true); setMessage(""); try { const created = await call<Connection>("/api/v1/connections", token, { method: "POST", body: JSON.stringify({ platform, label, authType: "ACCESS_TOKEN", credential }) }); setItems([created, ...items]); setLabel(""); setCredential(""); setMessage("连接已保存。凭据已加密，不会再次显示。"); } catch (cause) { setMessage(errorMessage(cause)); } finally { setBusy(false); } } return <><section className="zh-page-title"><p>API 连接</p><h1>让目录数据逐步接近数据源</h1><span>当前支持安全保存 Shopify 和自定义 REST API 的连接信息；Amazon、Walmart、Google Merchant 正在规划中。</span></section><div className="zh-connection-layout"><section className="zh-panel">{items.length ? items.map((item) => <div className="zh-connection" key={item.id}><b>{item.platform === "SHOPIFY" ? "S" : "A"}</b><div><strong>{item.label}</strong><span>{item.platform.replaceAll("_", " ")} · {item.authType.replaceAll("_", " ")}</span></div><small>{item.status}</small></div>) : <div className="zh-empty"><b>尚未连接数据源</b><span>你可以继续使用 CSV；连接 API 后可逐步实现自动目录同步。</span></div>}</section><form className="zh-panel zh-connect-form" onSubmit={save}><p>添加连接</p><label>平台<select value={platform} onChange={(e) => setPlatform(e.target.value)}><option value="SHOPIFY">Shopify</option><option value="CUSTOM_API">自定义 REST API</option></select></label><label>连接名称<input value={label} required onChange={(e) => setLabel(e.target.value)} placeholder="例如：美国 Shopify 店铺" /></label><label>访问令牌 / API Key<textarea value={credential} required onChange={(e) => setCredential(e.target.value)} placeholder="保存后会立即加密，页面不会回显" /></label>{message && <div className={message.includes("已保存") ? "zh-success" : "zh-error"}>{message}</div>}<button className="zh-primary" disabled={busy}>{busy ? "正在安全保存…" : "保存加密连接"}</button></form></div></>; }
 
-async function call<T>(path: string, token?: string, init: RequestInit = {}): Promise<T> { const headers = new Headers(init.headers); if (token) headers.set("Authorization", `Bearer ${token}`); if (init.body && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json"); const response = await fetch(`${apiBase}${path}`, { ...init, headers }); if (!response.ok) { const problem = await response.json().catch(() => null) as { detail?: string } | null; throw new Error(problem?.detail ?? "操作未完成，请稍后重试。"); } return response.json() as Promise<T>; }
+class ApiError extends Error {
+  constructor(readonly status: number, message: string) { super(message); }
+}
+async function call<T>(path: string, token?: string, init: RequestInit = {}): Promise<T> { const headers = new Headers(init.headers); if (token) headers.set("Authorization", `Bearer ${token}`); if (init.body && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json"); const response = await fetch(`${apiBase}${path}`, { ...init, headers }); if (!response.ok) { const problem = await response.json().catch(() => null) as { detail?: string } | null; throw new ApiError(response.status, problem?.detail ?? "操作未完成，请稍后重试。"); } return response.json() as Promise<T>; }
 function errorMessage(cause: unknown) { return cause instanceof Error ? cause.message : "操作未完成，请稍后重试。"; }
 function severityLabel(value: Issue["severity"]) { return { BLOCKER: "阻断", HIGH: "高", MEDIUM: "中", OPPORTUNITY: "建议" }[value]; }

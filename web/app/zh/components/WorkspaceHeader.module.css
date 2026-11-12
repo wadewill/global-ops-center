@@ -1,36 +1,39 @@
-.header {
-  min-height: 70px;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  padding: 12px max(22px, calc((100vw - 1120px) / 2));
-  background: #fff;
-  color: #142d36;
-  border-bottom: 1px solid #dce6e2;
-  font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+.header { color: #252525; background: #f5f5f5; font-family: Arial, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.header a { color: inherit; text-decoration: none; }
+.utility { background: #ededed; border-bottom: 1px solid #e5e5e5; color: #777; font-size: 11px; }
+.utility>div { max-width: 1200px; margin: auto; padding: 9px 0; display: flex; justify-content: space-between; gap: 20px; }
+.utility nav { display: flex; gap: 22px; }
+.utility a:hover { color: #e54b25; }
+.masthead { max-width: 1200px; min-height: 102px; margin: auto; display: flex; align-items: center; gap: 24px; padding: 20px 0; }
+.logo { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; }
+.logo>b { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 8px; color: #fff; background: #e54b25; font-size: 23px; font-style: italic; letter-spacing: -2px; }
+.logo>span { font-size: 23px; letter-spacing: -.8px; font-weight: 750; line-height: 1.2; }
+.logo small { display: block; margin-top: 6px; font-size: 10px; letter-spacing: 2px; font-weight: 400; color: #888; }
+.caption { border-left: 1px solid #ddd; padding-left: 24px; font-size: 15px; font-weight: 500; }
+.account { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 12px; min-width: 0; }
+.name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #666; }
+.account button { padding: 8px 14px; border: 1px solid #ddd; border-radius: 3px; background: #fff; color: #777; white-space: nowrap; font-size: 12px; }
+.account a { color: #c54221; }
+.navigation { border-bottom: 2px solid #e54b25; background: #fff; }
+.navigation>div { display: flex; align-items: stretch; gap: 12px; max-width: 1200px; margin: auto; }
+.navigation a { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 25px; font-size: 13px; font-weight: 600; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+.navigation a:hover { color: #e54b25; background: #fff8f3; }
+.navigation a[aria-current="page"] { background: #e54b25; color: #fff; border-color: #e54b25; }
+.header a:focus-visible, .account button:focus-visible { outline: 2px solid #bf3518; outline-offset: 3px; }
+@media (max-width: 1240px) {
+  .utility>div, .masthead, .navigation>div { margin-left: 22px; margin-right: 22px; }
 }
-
-.logo { color: inherit; text-decoration: none; font-size: 18px; font-weight: 800; white-space: nowrap; }
-.logo i { display: inline-grid; place-items: center; width: 25px; height: 25px; margin-right: 6px; border-radius: 8px; background: #168568; color: #fff; font-style: normal; }
-.logo small { color: #168568; font-size: 10px; margin-left: 3px; }
-.navigation { display: flex; align-items: center; gap: 5px; }
-.navigation a { padding: 10px 11px; border-radius: 7px; color: #526a6d; font-size: 13px; text-decoration: none; white-space: nowrap; }
-.navigation a:hover { background: #f0f6f3; }
-.navigation a[aria-current="page"] { color: #13775c; background: #e7f4ed; font-weight: 700; }
-.header a:focus-visible, .account button:focus-visible { outline: 2px solid #168568; outline-offset: 3px; }
-.account { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 13px; }
-.name { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.account button { padding: 7px 0; border: 0; background: none; color: #65777a; white-space: nowrap; }
-
-@media (max-width: 900px) {
-  .header { flex-wrap: wrap; padding: 12px 18px; gap: 10px; }
-  .navigation { order: 3; flex-basis: 100%; flex-wrap: wrap; }
-  .navigation a { flex: 1; padding: 10px 7px; text-align: center; }
-  .account { font-size: 12px; }
-  .name { max-width: 95px; }
-}
-
-@media (max-width: 600px) {
-  .navigation { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
-  .navigation a { font-size: 11px; padding: 10px 3px; }
+@media (max-width: 720px) {
+  .utility>div { margin: 0 16px; font-size: 10px; }
+  .utility nav { gap: 16px; }
+  .masthead { margin: 0 16px; padding: 18px 0; min-height: 82px; gap: 12px; }
+  .logo>b { width: 34px; height: 34px; font-size: 19px; }
+  .logo>span { font-size: 21px; }
+  .logo small { font-size: 9px; letter-spacing: 1px; margin-top: 3px; }
+  .caption { display: none; }
+  .account { gap: 9px; font-size: 11px; }
+  .name { max-width: 68px; }
+  .account button { padding: 7px 8px; font-size: 11px; }
+  .navigation>div { margin: 0 14px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; }
+  .navigation a { padding: 0 3px; font-size: 11px; min-height: 42px; }
 }
