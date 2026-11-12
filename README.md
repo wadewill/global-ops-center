@@ -1,14 +1,14 @@
 # ListingScore MVP
 
-ListingScore is a catalog pre-flight checker for cross-border sellers. This repository contains the first vertical slice: upload a CSV catalog, normalize common fields, run deterministic checks, review issues, and download a repair package.
+ListingScore is a catalog pre-flight checker for cross-border sellers. It provides a private workspace for uploading a CSV catalog, finding deterministic data-quality issues, reviewing saved reports, and preparing API source connections.
 
 ## Architecture
 
-- `web/`: Next.js + TypeScript upload and results UI
-- `server/`: Java 20 / Spring Boot API, MySQL persistence model, Redis-ready configuration
+- `web/`: Next.js + TypeScript workspace, authentication, diagnostics and connection UI
+- `server/`: Java 20 / Spring Boot API, JWT authentication, MySQL persistence and Redis-ready configuration
 - `docker-compose.yml`: local MySQL 8 and Redis 7 services
 
-The MVP intentionally does not include store OAuth, automatic write-back, payment, or model-generated copy. Those are planned only after the catalog-diagnosis loop is validated.
+CSV diagnosis is available today. Shopify/custom REST connection records can be saved today; channel-specific OAuth, marketplace data pulls and write-back remain planned work.
 
 ## Run locally
 
@@ -19,12 +19,24 @@ The MVP intentionally does not include store OAuth, automatic write-back, paymen
 
 The API defaults to MySQL at `localhost:3306/listingscore`. Copy `.env.example` values into your local environment when needed. For a dependency-free API smoke run, use `cd server && /Applications/IntelliJ\ IDEA.app/Contents/plugins/maven-plugin/lib/maven3/bin/mvn -Dspring-boot.run.profiles=local spring-boot:run`; the `local` profile uses an in-memory H2 database and disables Redis. The production configuration remains MySQL-first.
 
-## API
+## API and authentication
 
+All endpoints other than health and `/api/v1/auth/**` require `Authorization: Bearer <accessToken>`. Access tokens expire after 12 hours by default. Imports and API connections are isolated by authenticated user.
+
+- `POST /api/v1/auth/register` — create an account and return an access token
+- `POST /api/v1/auth/login` — return an access token
+- `GET /api/v1/auth/me` — current account
 - `GET /actuator/health`
 - `POST /api/v1/imports` (`multipart/form-data`, field name `file`; CSV in this vertical slice)
+- `GET /api/v1/imports` — current user's recent reports
 - `GET /api/v1/imports/{id}`
 - `GET /api/v1/imports/{id}/export`
+- `GET /api/v1/connections/platforms` — available and planned platforms
+- `GET` / `POST /api/v1/connections` — list/create an API source connection
+- `POST /api/v1/connections/{id}/verify` — record a configuration review
+- `DELETE /api/v1/connections/{id}`
+
+Connection credentials are encrypted using AES-GCM before persistence and are intentionally never returned by the API. Production requires `LISTINGSCORE_JWT_SECRET` and `LISTINGSCORE_CREDENTIAL_KEY`; the Compose deployment reads both only from `deploy/.env`.
 
 Example CSV columns: `sku,title,description,price,image_url,availability,brand,gtin,item_group_id,color,size`.
 
@@ -36,4 +48,4 @@ The production-style test stack is in `deploy/docker-compose.prod.yml`. On an Ub
 docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --build
 ```
 
-Only port 80 is published. MySQL and Redis remain private to the Docker network.
+Only port 80 is published. MySQL and Redis remain private to the Docker network. For public use, place the service behind a domain and TLS reverse proxy; HTTP-only is suitable only for this test environment.
