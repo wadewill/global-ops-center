@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @Table(name = "catalog_imports")
 public class CatalogImport {
     @Id
+    @JdbcTypeCode(SqlTypes.CHAR)
     private UUID id;
     @Column(nullable = false)
     private String sourceName;
