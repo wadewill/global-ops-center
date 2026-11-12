@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: listingscore
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/listingscore?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:listingscore}
+    password: ${SPRING_DATASOURCE_PASSWORD:listingscore}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  data:
+    redis:
+      repositories:
+        enabled: false
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+
+server:
+  error:
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+listingscore:
+  redis:
+    enabled: ${LISTINGSCORE_REDIS_ENABLED:false}

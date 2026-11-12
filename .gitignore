@@ -1,0 +1,14 @@
+# Java build output
+server/target/
+
+# Next.js build output and dependencies
+web/.next/
+web/node_modules/
+web/out/
+
+# Local configuration
+.env
+.env.local
+
+# Operating-system files
+.DS_Store
