@@ -2,7 +2,7 @@
 
 ListingScore is a catalog pre-flight checker for cross-border sellers. It provides a private workspace for uploading a CSV catalog, finding deterministic data-quality issues, reviewing saved reports, and preparing API source connections.
 
-The default interface is English; the fully functional Simplified Chinese workspace is available at `/zh`.
+The default interface is English; the fully functional Simplified Chinese workspace is available at `/zh`, with a Chinese product narrative at `/zh/product`.
 
 ## Architecture
 
