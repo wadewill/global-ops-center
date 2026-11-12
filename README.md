@@ -40,8 +40,12 @@ Registration is protected with Redis-backed rate limits: 5 registrations per IP 
 - `GET` / `POST /api/v1/connections` — list/create an API source connection
 - `POST /api/v1/connections/{id}/verify` — record a configuration review
 - `DELETE /api/v1/connections/{id}`
+- `GET /api/v1/tasks?status=OPEN` — list the current user's remediation worklist
+- `PATCH /api/v1/tasks/{id}` — move a task to `OPEN`, `IN_PROGRESS`, or `DONE`
 
 Connection credentials are encrypted using AES-GCM before persistence and are intentionally never returned by the API. Production requires `LISTINGSCORE_JWT_SECRET` and `LISTINGSCORE_CREDENTIAL_KEY`; the Compose deployment reads both only from `deploy/.env`.
+
+Each diagnosis automatically turns its findings into private remediation tasks, so that a quality report becomes an operational worklist rather than a static CSV export.
 
 Example CSV columns: `sku,title,description,price,image_url,availability,brand,gtin,item_group_id,color,size`.
 

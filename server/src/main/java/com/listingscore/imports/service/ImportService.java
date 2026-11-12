@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import com.listingscore.imports.api.ImportHistoryResponse;
+import com.listingscore.tasks.service.TaskService;
 
 @Service
 public class ImportService {
@@ -30,12 +31,14 @@ public class ImportService {
     private final RuleEngine ruleEngine;
     private final CatalogImportRepository repository;
     private final ObjectMapper objectMapper;
+    private final TaskService taskService;
 
-    public ImportService(CsvCatalogParser parser, RuleEngine ruleEngine, CatalogImportRepository repository, ObjectMapper objectMapper) {
+    public ImportService(CsvCatalogParser parser, RuleEngine ruleEngine, CatalogImportRepository repository, ObjectMapper objectMapper, TaskService taskService) {
         this.parser = parser;
         this.ruleEngine = ruleEngine;
         this.repository = repository;
         this.objectMapper = objectMapper;
+        this.taskService = taskService;
     }
 
     @Transactional
@@ -54,6 +57,7 @@ public class ImportService {
             ImportResponse response = new ImportResponse(catalogImport.getId(), catalogImport.getSourceName(), catalogImport.getStatus().name(), catalogImport.getTotalRows(), catalogImport.getCatalogScore(), summary, catalog.mappedFields(), orderedIssues, catalogImport.getCreatedAt());
             catalogImport.saveAnalysis(writeResponse(response), exportCsv(catalog.rows(), orderedIssues));
             repository.save(catalogImport);
+            taskService.createForImport(ownerId, catalogImport.getId(), orderedIssues);
             return response;
         } catch (IOException ex) {
             throw new IllegalArgumentException("The CSV file could not be read.");

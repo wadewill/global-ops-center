@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +55,12 @@ class ImportControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("text/csv;charset=UTF-8"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("SKU_DUPLICATE")));
+
+        String tasks = mockMvc.perform(get("/api/v1/tasks").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(10))).andReturn().getResponse().getContentAsString();
+        String taskId = objectMapper.readTree(tasks).get(0).path("id").asText();
+        mockMvc.perform(patch("/api/v1/tasks/{id}", taskId).header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"IN_PROGRESS\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("IN_PROGRESS"));
     }
 
     @Test
