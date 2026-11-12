@@ -29,3 +29,8 @@
   .account { font-size: 12px; }
   .name { max-width: 95px; }
 }
+
+@media (max-width: 600px) {
+  .navigation { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
+  .navigation a { font-size: 11px; padding: 10px 3px; }
+}

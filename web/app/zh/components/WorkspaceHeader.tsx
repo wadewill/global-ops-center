@@ -3,9 +3,10 @@
 import Link from "next/link";
 import styles from "./WorkspaceHeader.module.css";
 
-export type WorkspaceSection = "overview" | "diagnosis" | "connections" | "tasks";
+export type WorkspaceSection = "home" | "overview" | "diagnosis" | "connections" | "tasks";
 
 const sections: { id: WorkspaceSection; label: string; href: string }[] = [
+  { id: "home", label: "产品首页", href: "/" },
   { id: "overview", label: "工作概览", href: "/zh" },
   { id: "diagnosis", label: "目录诊断", href: "/zh?tab=diagnosis" },
   { id: "connections", label: "API 连接", href: "/zh?tab=connections" },
@@ -19,7 +20,7 @@ export default function WorkspaceHeader({ active, displayName, onSignOut }: {
 }) {
   return (
     <header className={styles.header}>
-      <Link href="/zh" className={styles.logo} aria-label="ListingScore 中文首页">
+      <Link href="/" className={styles.logo} aria-label="ListingScore 产品首页">
         <i aria-hidden="true">✦</i> ListingScore <small>中文</small>
       </Link>
       <nav className={styles.navigation} aria-label="工作空间导航">

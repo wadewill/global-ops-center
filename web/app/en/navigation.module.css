@@ -1,0 +1,4 @@
+.navigation { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 15px; padding: 12px 24px; background: #f6f9f1; border-bottom: 1px solid #dce5d6; font-size: 12px; }
+.navigation a { color: #315c40; text-decoration: none; }
+.navigation a:hover { text-decoration: underline; }
+.navigation a:focus-visible { outline: 2px solid #168568; outline-offset: 4px; }
