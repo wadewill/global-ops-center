@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.listingscore.imports.api.ImportHistoryResponse;
 
 @Service
 public class ImportService {
@@ -38,7 +39,7 @@ public class ImportService {
     }
 
     @Transactional
-    public ImportResponse analyze(MultipartFile file) {
+    public ImportResponse analyze(MultipartFile file, UUID ownerId) {
         validate(file);
         try (InputStreamReader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8)) {
             CsvCatalogParser.ParsedCatalog catalog = parser.parse(reader);
@@ -46,7 +47,7 @@ public class ImportService {
             SummaryResponse summary = summarize(issues);
             int score = calculateScore(catalog.rows().size(), issues);
             UUID id = UUID.randomUUID();
-            CatalogImport catalogImport = new CatalogImport(id, file.getOriginalFilename(), catalog.rows().size(), score);
+            CatalogImport catalogImport = new CatalogImport(id, ownerId, file.getOriginalFilename(), catalog.rows().size(), score);
             List<IssueResponse> orderedIssues = issues.stream()
                     .sorted(Comparator.comparing(IssueResponse::severity).thenComparing(IssueResponse::rowNumber))
                     .toList();
@@ -59,16 +60,18 @@ public class ImportService {
         }
     }
 
-    public ImportResponse get(UUID id) {
-        CatalogImport item = repository.findById(id).orElseThrow(() -> new ImportNotFoundException(id));
+    public ImportResponse get(UUID id, UUID ownerId) {
+        CatalogImport item = owned(id, ownerId);
         return readResponse(item.getAnalysisJson(), id);
     }
 
-    public String export(UUID id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ImportNotFoundException(id))
-                .getExportCsv();
+    public String export(UUID id, UUID ownerId) { return owned(id, ownerId).getExportCsv(); }
+    public List<ImportHistoryResponse> list(UUID ownerId) {
+        return repository.findTop12ByOwnerIdOrderByCreatedAtDesc(ownerId).stream()
+                .map(item -> new ImportHistoryResponse(item.getId(), item.getSourceName(), item.getTotalRows(), item.getCatalogScore(), item.getCreatedAt())).toList();
     }
+
+    private CatalogImport owned(UUID id, UUID ownerId) { return repository.findByIdAndOwnerId(id, ownerId).orElseThrow(() -> new ImportNotFoundException(id)); }
 
     private void validate(MultipartFile file) {
         if (file == null || file.isEmpty()) throw new IllegalArgumentException("Choose a non-empty CSV file.");

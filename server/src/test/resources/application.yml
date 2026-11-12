@@ -18,3 +18,7 @@ spring:
 listingscore:
   redis:
     enabled: false
+  security:
+    jwt-secret: test-only-secret-that-is-long-enough-for-hmac-signing-2026
+    credential-key: test-only-credential-encryption-key-2026
+    token-ttl-hours: 12

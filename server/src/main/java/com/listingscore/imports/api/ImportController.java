@@ -1,6 +1,7 @@
 package com.listingscore.imports.api;
 
 import com.listingscore.imports.service.ImportService;
+import com.listingscore.auth.service.AuthService;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -20,27 +21,31 @@ import java.util.UUID;
 @RequestMapping("/api/v1/imports")
 public class ImportController {
     private final ImportService importService;
+    private final AuthService authService;
 
-    public ImportController(ImportService importService) {
+    public ImportController(ImportService importService, AuthService authService) {
         this.importService = importService;
+        this.authService = authService;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImportResponse> create(@RequestPart("file") MultipartFile file) {
-        return ResponseEntity.status(201).body(importService.analyze(file));
+        return ResponseEntity.status(201).body(importService.analyze(file, authService.currentUser().getId()));
     }
+
+    @GetMapping
+    public java.util.List<ImportHistoryResponse> list() { return importService.list(authService.currentUser().getId()); }
 
     @GetMapping("/{id}")
     public ImportResponse get(@PathVariable UUID id) {
-        return importService.get(id);
+        return importService.get(id, authService.currentUser().getId());
     }
 
     @GetMapping("/{id}/export")
     public ResponseEntity<byte[]> export(@PathVariable UUID id) {
-        byte[] content = importService.export(id).getBytes(StandardCharsets.UTF_8);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("listingscore-repair-package.csv").build().toString())
-                .body(content);
+                .body(importService.export(id, authService.currentUser().getId()).getBytes(StandardCharsets.UTF_8));
     }
 }

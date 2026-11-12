@@ -18,6 +18,8 @@ public class CatalogImport {
     @Id
     @JdbcTypeCode(SqlTypes.CHAR)
     private UUID id;
+    @JdbcTypeCode(SqlTypes.CHAR)
+    private UUID ownerId;
     @Column(nullable = false)
     private String sourceName;
     @Enumerated(EnumType.STRING)
@@ -39,8 +41,9 @@ public class CatalogImport {
     protected CatalogImport() {
     }
 
-    public CatalogImport(UUID id, String sourceName, int totalRows, int catalogScore) {
+    public CatalogImport(UUID id, UUID ownerId, String sourceName, int totalRows, int catalogScore) {
         this.id = id;
+        this.ownerId = ownerId;
         this.sourceName = sourceName;
         this.status = ImportStatus.SUCCEEDED;
         this.totalRows = totalRows;
@@ -49,6 +52,7 @@ public class CatalogImport {
     }
 
     public UUID getId() { return id; }
+    public UUID getOwnerId() { return ownerId; }
     public String getSourceName() { return sourceName; }
     public ImportStatus getStatus() { return status; }
     public int getTotalRows() { return totalRows; }

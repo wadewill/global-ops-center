@@ -39,6 +39,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       LISTINGSCORE_REDIS_ENABLED: "true"
+      LISTINGSCORE_JWT_SECRET: ${LISTINGSCORE_JWT_SECRET:?Set LISTINGSCORE_JWT_SECRET in deploy/.env}
+      LISTINGSCORE_CREDENTIAL_KEY: ${LISTINGSCORE_CREDENTIAL_KEY:?Set LISTINGSCORE_CREDENTIAL_KEY in deploy/.env}
     depends_on:
       mysql:
         condition: service_healthy

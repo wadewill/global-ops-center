@@ -35,3 +35,7 @@ management:
 listingscore:
   redis:
     enabled: ${LISTINGSCORE_REDIS_ENABLED:false}
+  security:
+    jwt-secret: ${LISTINGSCORE_JWT_SECRET:local-development-secret-change-before-production-2026}
+    token-ttl-hours: ${LISTINGSCORE_TOKEN_TTL_HOURS:12}
+    credential-key: ${LISTINGSCORE_CREDENTIAL_KEY:local-development-credential-key-32}

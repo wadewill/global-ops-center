@@ -5,13 +5,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     ProblemDetail invalidRequest(IllegalArgumentException exception) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
-        problem.setTitle("Invalid import request");
+        problem.setTitle("Invalid request");
+        return problem;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ProblemDetail validation(MethodArgumentNotValidException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getBindingResult().getFieldError() == null ? "Check the submitted fields." : exception.getBindingResult().getFieldError().getDefaultMessage());
+        problem.setTitle("Invalid request");
         return problem;
     }
 
