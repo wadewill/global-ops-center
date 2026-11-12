@@ -21,7 +21,7 @@ The API defaults to MySQL at `localhost:3306/listingscore`. Copy `.env.example` 
 
 ## API and authentication
 
-All endpoints other than health and `/api/v1/auth/**` require `Authorization: Bearer <accessToken>`. Access tokens expire after 12 hours by default. Imports and API connections are isolated by authenticated user.
+All endpoints other than health, the public CSV template, and `/api/v1/auth/**` require `Authorization: Bearer <accessToken>`. Access tokens expire after 12 hours by default. Imports and API connections are isolated by authenticated user.
 
 Registration is protected with Redis-backed rate limits: 5 registrations per IP per hour and 3 per email per hour. Login attempts are similarly constrained. In the local test profile the same policy uses an in-memory fallback.
 
