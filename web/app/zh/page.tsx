@@ -1,6 +1,8 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import WorkspaceHeader from "./components/WorkspaceHeader";
 import "./zh.css";
 
 type User = { id: string; email: string; displayName: string; role: string };
@@ -11,12 +13,26 @@ type Connection = { id: string; platform: string; label: string; authType: strin
 const apiBase = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080";
 
 export default function ChineseWorkspace() {
-  const [token, setToken] = useState<string | null>(null); const [user, setUser] = useState<User | null>(null); const [tab, setTab] = useState<"概览" | "诊断" | "连接">("概览"); const [reports, setReports] = useState<Report[]>([]); const [connections, setConnections] = useState<Connection[]>([]);
-  useEffect(() => { const saved = localStorage.getItem("listingscore-token"); if (saved) setToken(saved); }, []);
+  return <Suspense fallback={<><WorkspaceHeader active="overview" /><p role="status">正在加载工作空间…</p></>}><WorkspaceContent /></Suspense>;
+}
+
+function WorkspaceContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const selected = searchParams.get("tab");
+  const section = selected === "diagnosis" || selected === "connections" ? selected : "overview";
+  const tab = section === "diagnosis" ? "诊断" : section === "connections" ? "连接" : "概览";
+  function setTab(next: "概览" | "诊断" | "连接") {
+    router.push(next === "概览" ? "/zh" : `/zh?tab=${next === "诊断" ? "diagnosis" : "connections"}`);
+  }
+  const [token, setToken] = useState<string | null>(null); const [user, setUser] = useState<User | null>(null); const [reports, setReports] = useState<Report[]>([]); const [connections, setConnections] = useState<Connection[]>([]);
+  const [sessionReady, setSessionReady] = useState(false);
+  useEffect(() => { const saved = localStorage.getItem("listingscore-token"); if (saved) setToken(saved); setSessionReady(true); }, []);
   useEffect(() => { if (!token) return; Promise.all([call<User>("/api/v1/auth/me", token), call<Report[]>("/api/v1/imports", token), call<Connection[]>("/api/v1/connections", token)]).then(([me, history, linked]) => { setUser(me); setReports(history); setConnections(linked); }).catch(signOut); }, [token]);
   function signOut() { localStorage.removeItem("listingscore-token"); setToken(null); setUser(null); }
+  if (!sessionReady || (token && !user)) return <><WorkspaceHeader active={section} /><p role="status">正在加载工作空间…</p></>;
   if (!token || !user) return <ChineseAuth onSuccess={(nextToken, nextUser) => { localStorage.setItem("listingscore-token", nextToken); setToken(nextToken); setUser(nextUser); }} />;
-  return <main className="zh-shell"><header className="zh-header"><a href="/zh" className="zh-logo"><i>✦</i> ListingScore <small>中文</small></a><nav>{(["概览", "诊断", "连接"] as const).map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item === "概览" ? "工作概览" : item === "诊断" ? "目录诊断" : "API 连接"}</button>)}<a href="/zh/tasks">任务中心</a></nav><div className="zh-user"><span>{user.displayName}</span><button onClick={signOut}>退出</button></div></header><section className="zh-content">{tab === "概览" && <Overview reports={reports} connections={connections} onDiagnose={() => setTab("诊断")} onConnect={() => setTab("连接")} />}{tab === "诊断" && <Diagnosis token={token} reports={reports} setReports={setReports} />}{tab === "连接" && <Connections token={token} items={connections} setItems={setConnections} />}</section></main>;
+  return <><WorkspaceHeader active={section} displayName={user.displayName} onSignOut={signOut} /><main className="zh-shell"><section className="zh-content">{tab === "概览" && <Overview reports={reports} connections={connections} onDiagnose={() => setTab("诊断")} onConnect={() => setTab("连接")} />}{tab === "诊断" && <Diagnosis token={token} reports={reports} setReports={setReports} />}{tab === "连接" && <Connections token={token} items={connections} setItems={setConnections} />}</section></main></>;
 }
 
 function ChineseAuth({ onSuccess }: { onSuccess: (token: string, user: User) => void }) {
