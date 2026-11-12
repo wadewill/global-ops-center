@@ -23,12 +23,15 @@ The API defaults to MySQL at `localhost:3306/listingscore`. Copy `.env.example` 
 
 All endpoints other than health and `/api/v1/auth/**` require `Authorization: Bearer <accessToken>`. Access tokens expire after 12 hours by default. Imports and API connections are isolated by authenticated user.
 
+Registration is protected with Redis-backed rate limits: 5 registrations per IP per hour and 3 per email per hour. Login attempts are similarly constrained. In the local test profile the same policy uses an in-memory fallback.
+
 - `POST /api/v1/auth/register` — create an account and return an access token
 - `POST /api/v1/auth/login` — return an access token
 - `GET /api/v1/auth/me` — current account
 - `GET /actuator/health`
 - `POST /api/v1/imports` (`multipart/form-data`, field name `file`; CSV in this vertical slice)
 - `GET /api/v1/imports` — current user's recent reports
+- `GET /api/v1/imports/template` — downloadable starter CSV template
 - `GET /api/v1/imports/{id}`
 - `GET /api/v1/imports/{id}/export`
 - `GET /api/v1/connections/platforms` — available and planned platforms

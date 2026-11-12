@@ -36,6 +36,13 @@ public class ImportController {
     @GetMapping
     public java.util.List<ImportHistoryResponse> list() { return importService.list(authService.currentUser().getId()); }
 
+    @GetMapping("/template")
+    public ResponseEntity<byte[]> template() {
+        String csv = "sku,title,description,price,image_url,availability,brand,gtin,item_group_id,color,size\nSKU-001,Example product,Describe key material and benefits,19.99,https://cdn.example.com/image.jpg,in_stock,Example Brand,1234567890123,GROUP-001,Blue,M\n";
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType("text/csv;charset=UTF-8"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("listingscore-catalog-template.csv").build().toString()).body(csv.getBytes(StandardCharsets.UTF_8));
+    }
+
     @GetMapping("/{id}")
     public ImportResponse get(@PathVariable UUID id) {
         return importService.get(id, authService.currentUser().getId());
