@@ -27,3 +27,13 @@ The API defaults to MySQL at `localhost:3306/listingscore`. Copy `.env.example` 
 - `GET /api/v1/imports/{id}/export`
 
 Example CSV columns: `sku,title,description,price,image_url,availability,brand,gtin,item_group_id,color,size`.
+
+## Test-server deployment
+
+The production-style test stack is in `deploy/docker-compose.prod.yml`. On an Ubuntu host with Docker Compose installed, create `deploy/.env` from `deploy/.env.example`, set unique database passwords, and run:
+
+```bash
+docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml up -d --build
+```
+
+Only port 80 is published. MySQL and Redis remain private to the Docker network.

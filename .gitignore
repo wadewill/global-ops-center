@@ -9,6 +9,7 @@ web/out/
 # Local configuration
 .env
 .env.local
+deploy/.env
 
 # Operating-system files
 .DS_Store
