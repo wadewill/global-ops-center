@@ -1,6 +1,8 @@
 package com.listingscore.tasks.service;
 
 import com.listingscore.imports.api.IssueResponse;
+import com.listingscore.common.ApiErrorCode;
+import com.listingscore.common.ApiException;
 import com.listingscore.tasks.api.TaskResponse;
 import com.listingscore.tasks.domain.*;
 import org.springframework.stereotype.Service;
@@ -14,5 +16,5 @@ public class TaskService {
     public TaskService(RemediationTaskRepository tasks) { this.tasks = tasks; }
     @Transactional public void createForImport(UUID ownerId, UUID importId, List<IssueResponse> issues) { tasks.saveAll(issues.stream().map(issue -> new RemediationTask(ownerId, importId, issue)).toList()); }
     public List<TaskResponse> list(UUID ownerId, TaskStatus status) { List<RemediationTask> result = status == null ? tasks.findTop100ByOwnerIdOrderByCreatedAtDesc(ownerId) : tasks.findByOwnerIdAndStatusOrderByCreatedAtDesc(ownerId, status); return result.stream().map(TaskResponse::from).toList(); }
-    @Transactional public TaskResponse update(UUID ownerId, UUID id, TaskStatus status) { RemediationTask task=tasks.findByIdAndOwnerId(id,ownerId).orElseThrow(() -> new IllegalArgumentException("Task was not found.")); task.moveTo(status); return TaskResponse.from(task); }
+    @Transactional public TaskResponse update(UUID ownerId, UUID id, TaskStatus status) { RemediationTask task=tasks.findByIdAndOwnerId(id,ownerId).orElseThrow(() -> new ApiException(ApiErrorCode.TASK_NOT_FOUND)); task.moveTo(status); return TaskResponse.from(task); }
 }

@@ -2,6 +2,8 @@ package com.listingscore.imports.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.listingscore.common.ApiErrorCode;
+import com.listingscore.common.ApiException;
 import com.listingscore.imports.api.ImportResponse;
 import com.listingscore.imports.api.IssueResponse;
 import com.listingscore.imports.api.Severity;
@@ -60,7 +62,7 @@ public class ImportService {
             taskService.createForImport(ownerId, catalogImport.getId(), orderedIssues);
             return response;
         } catch (IOException ex) {
-            throw new IllegalArgumentException("The CSV file could not be read.");
+            throw new ApiException(ApiErrorCode.CSV_READ_FAILED, ex);
         }
     }
 
@@ -78,10 +80,10 @@ public class ImportService {
     private CatalogImport owned(UUID id, UUID ownerId) { return repository.findByIdAndOwnerId(id, ownerId).orElseThrow(() -> new ImportNotFoundException(id)); }
 
     private void validate(MultipartFile file) {
-        if (file == null || file.isEmpty()) throw new IllegalArgumentException("Choose a non-empty CSV file.");
-        if (file.getSize() > 5 * 1024 * 1024) throw new IllegalArgumentException("The file must be 5 MB or smaller.");
+        if (file == null || file.isEmpty()) throw new ApiException(ApiErrorCode.EMPTY_CSV);
+        if (file.getSize() > 5 * 1024 * 1024) throw new ApiException(ApiErrorCode.FILE_TOO_LARGE);
         String name = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
-        if (!name.endsWith(".csv")) throw new IllegalArgumentException("This MVP accepts UTF-8 CSV files only.");
+        if (!name.endsWith(".csv")) throw new ApiException(ApiErrorCode.UNSUPPORTED_FILE_TYPE);
     }
 
     private SummaryResponse summarize(List<IssueResponse> issues) {
@@ -136,7 +138,7 @@ public class ImportService {
         }
     }
 
-    public static class ImportNotFoundException extends RuntimeException {
-        public ImportNotFoundException(UUID id) { super("Import %s was not found.".formatted(id)); }
+    public static class ImportNotFoundException extends ApiException {
+        public ImportNotFoundException(UUID id) { super(ApiErrorCode.IMPORT_NOT_FOUND); }
     }
 }

@@ -209,6 +209,8 @@
   .banner { min-height: 270px; grid-template-columns: 1.2fr 1fr; }
   .bannerCopy { padding: 23px 0 23px 22px; }
   .bannerCopy h1 { font-size: 24px; }
+  .page:lang(en) .bannerCopy { min-width: 0; padding-right: 10px; }
+  .page:lang(en) .bannerCopy h1 { font-size: 23px; letter-spacing: -.6px; }
   .bannerCopy>p { font-size: 10px; margin-bottom: 12px; letter-spacing: 0; }
   .bannerCopy>span { font-size: 10px; }
   .bannerCopy>small { font-size: 8px; }

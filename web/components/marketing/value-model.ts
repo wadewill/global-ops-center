@@ -1,3 +1,5 @@
+import { marketingText, type MarketingLocale } from "./marketing-text";
+
 export type ValueInputKey = "visits" | "currentRate" | "targetRate" | "orderValue" | "margin" | "budget";
 export type ValueInputs = Record<ValueInputKey, string>;
 
@@ -26,20 +28,20 @@ export type ValueResult = {
 
 const roundMoney = (number: number) => Math.round((number + Number.EPSILON) * 100) / 100;
 
-export function calculateValue(inputs: ValueInputs): { errors: Partial<Record<ValueInputKey, string>>; result: ValueResult | null } {
+export function calculateValue(inputs: ValueInputs, locale: MarketingLocale = "zh-CN"): { errors: Partial<Record<ValueInputKey, string>>; result: ValueResult | null } {
   const errors: Partial<Record<ValueInputKey, string>> = {};
   const values = {} as Record<ValueInputKey, number>;
   for (const field of valueFields) {
     const raw = inputs[field.key].trim();
     const value = Number(raw);
     if (!raw || !Number.isFinite(value)) {
-      errors[field.key] = `请填写有效的${field.label}`;
+      errors[field.key] = locale === "en" ? `Enter a valid value for ${marketingText(locale, field.label).toLowerCase()}` : `请填写有效的${field.label}`;
     } else if (value < field.min || value > field.max) {
-      errors[field.key] = `请输入 ${field.min} 至 ${field.max.toLocaleString("zh-CN")} 之间的数值`;
+      errors[field.key] = locale === "en" ? `Enter a value from ${field.min} to ${field.max.toLocaleString("en")}` : `请输入 ${field.min} 至 ${field.max.toLocaleString("zh-CN")} 之间的数值`;
     } else if (field.key === "visits" && !Number.isInteger(value)) {
-      errors[field.key] = "访问量请填写整数";
+      errors[field.key] = marketingText(locale, "访问量请填写整数");
     } else if (field.key !== "visits" && Math.abs(value * 100 - Math.round(value * 100)) > 0.000001) {
-      errors[field.key] = "请最多保留 2 位小数";
+      errors[field.key] = marketingText(locale, "请最多保留 2 位小数");
     }
     values[field.key] = value;
   }

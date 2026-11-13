@@ -27,6 +27,12 @@ class AuthControllerTest {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().string("Retry-After", org.hamcrest.Matchers.notNullValue()))
                 .andExpect(jsonPath("$.title").value("Too many attempts"));
+        mockMvc.perform(register("rate-overflow-zh@example.com", "198.51.100.99").header("Accept-Language", "zh-CN"))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", org.hamcrest.Matchers.notNullValue()))
+                .andExpect(header().string("Content-Language", "zh-CN"))
+                .andExpect(jsonPath("$.code").value("RATE_LIMITED"))
+                .andExpect(jsonPath("$.detail").value("操作过于频繁，请稍后重试。"));
     }
 
     @Test

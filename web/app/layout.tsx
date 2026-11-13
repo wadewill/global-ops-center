@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import DocumentLanguage from "../components/DocumentLanguage";
 
 export const metadata: Metadata = {
   title: "ListingScore | Catalog pre-flight",
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-CN"><body>{children}</body></html>;
+  return <html lang="zh-CN"><body><DocumentLanguage />{children}</body></html>;
 }

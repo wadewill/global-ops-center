@@ -2,7 +2,7 @@
 
 ListingScore is a catalog pre-flight checker for cross-border sellers. It provides a private workspace for uploading a CSV catalog, finding deterministic data-quality issues, reviewing saved reports, and preparing API source connections.
 
-The public homepage at `/` introduces the product's value, illustrative before/after scenarios, and an interactive value calculator. The Simplified Chinese workspace remains at `/zh`, tasks at `/zh/tasks`, and the English workspace at `/en`. The older `/zh/product` route uses the same public homepage.
+The public homepage at `/` introduces the product's value, illustrative before/after scenarios, and an interactive value calculator. Its English version is at `/en/product`. The Simplified Chinese workspace is at `/zh`, with tasks at `/zh/tasks`; the English workspace is at `/en`, with tasks at `/en/tasks`. The older `/zh/product` route uses the Chinese public homepage. Language links preserve the current workspace tab, login/register mode and supported post-login destination. Return destinations are limited to known workspace routes.
 
 Marketing examples are explicitly hypothetical, not customer results or performance guarantees. The calculator holds traffic constant and separates incremental sales, gross profit, and the amount remaining after a user-defined tool budget (not a product price). Payments, native platform synchronization, and automatic sales attribution are not available yet.
 
@@ -50,6 +50,35 @@ Connection credentials are encrypted using AES-GCM before persistence and are in
 Each diagnosis automatically turns its findings into private remediation tasks, so that a quality report becomes an operational worklist rather than a static CSV export.
 
 Example CSV columns: `sku,title,description,price,image_url,availability,brand,gtin,item_group_id,color,size`.
+
+## Language and API errors
+
+The page route selects the UI language. Every frontend API request, including CSV template and repair-package downloads, sends `Accept-Language: zh-CN` or `Accept-Language: en`. The API accepts Chinese (`zh`, `zh-*`) and English (`en`, `en-*`) language ranges; missing, malformed or unsupported preferences default to English. Responses include `Content-Language: zh-CN` or `Content-Language: en` and `Vary: Accept-Language`.
+
+Errors use Problem Details with localized `title` and `detail`, plus a stable `code` such as `INVALID_CREDENTIALS`, `VALIDATION_FAILED` or `AUTHENTICATION_REQUIRED`. Clients should branch on `code` or HTTP status, not translated text. Validation errors also include a `fields` array with `field`, `code` and localized `message` entries; throttled requests retain `Retry-After`. The frontend has its own translated fallbacks for older APIs, proxy failures and network errors.
+
+For example, this unauthenticated request returns HTTP 401 with a Chinese message and the unchanged `AUTHENTICATION_REQUIRED` code:
+
+```bash
+curl -i -H 'Accept-Language: zh-CN' http://localhost:8080/api/v1/tasks
+```
+
+Diagnostic findings, repair suggestions and task descriptions are localized when returned, including previously saved reports. Stored rule output is unchanged, so switching languages does not alter another request's results. Rule IDs, SKU values, field codes, status enums and CSV column headers stay stable; user-provided names and content are not translated.
+
+## Frontend checks
+
+After installing `web/` dependencies, run the TypeScript checks and Node test suites from that directory. The tests cover workspace/locale navigation, safe login return paths, API language/error handling and calculator validation. Test compilation goes into a temporary directory outside the repository; no additional test runner is needed.
+
+```bash
+cd web
+npx tsc --noEmit --incremental false
+frontend_test_dir=$(mktemp -d)
+npx tsc --target ES2022 --module commonjs --moduleResolution node --esModuleInterop --strict --skipLibCheck --outDir "$frontend_test_dir" \
+  app/zh/workspace-navigation.test.ts lib/localized-api.test.ts lib/locale-routes.test.ts components/marketing/value-model.test.ts
+node --test "$frontend_test_dir/app/zh/workspace-navigation.test.js" \
+  "$frontend_test_dir/lib/localized-api.test.js" "$frontend_test_dir/lib/locale-routes.test.js" \
+  "$frontend_test_dir/components/marketing/value-model.test.js"
+```
 
 ## Test-server deployment
 

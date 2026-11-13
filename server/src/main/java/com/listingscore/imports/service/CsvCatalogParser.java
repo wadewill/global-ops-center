@@ -1,5 +1,8 @@
 package com.listingscore.imports.service;
 
+import com.listingscore.common.ApiErrorCode;
+import com.listingscore.common.ApiException;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -37,7 +40,7 @@ class CsvCatalogParser {
         try (CSVParser parser = new CSVParser(reader, format)) {
             Map<String, String> mapping = buildMapping(parser.getHeaderMap().keySet());
             if (mapping.isEmpty()) {
-                throw new IllegalArgumentException("No supported product fields were found in the header row.");
+                throw new ApiException(ApiErrorCode.CSV_HEADER_UNSUPPORTED);
             }
             List<ProductRow> rows = new ArrayList<>();
             for (CSVRecord record : parser) {
@@ -48,9 +51,13 @@ class CsvCatalogParser {
                 rows.add(new ProductRow((int) record.getRecordNumber() + 1, fields));
             }
             if (rows.isEmpty()) {
-                throw new IllegalArgumentException("The file has a header but no product rows.");
+                throw new ApiException(ApiErrorCode.CSV_NO_PRODUCTS);
             }
             return new ParsedCatalog(rows, List.copyOf(mapping.values()));
+        } catch (ApiException exception) {
+            throw exception;
+        } catch (IllegalArgumentException | java.io.UncheckedIOException exception) {
+            throw new ApiException(ApiErrorCode.CSV_READ_FAILED, exception);
         }
     }
 
