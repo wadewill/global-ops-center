@@ -3,8 +3,8 @@ import "./globals.css";
 import DocumentLanguage from "../components/DocumentLanguage";
 
 export const metadata: Metadata = {
-  title: "ListingScore | Catalog pre-flight",
-  description: "Find catalog data problems before products go live or enter paid channels."
+  title: "ListingScore 商家服务",
+  description: "检查商品数据问题，管理诊断报告、API 连接和修复任务。"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

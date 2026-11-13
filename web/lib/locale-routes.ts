@@ -8,6 +8,8 @@ export function localeHref(pathname: string, search: string, locale: Locale): st
   const query = new URLSearchParams();
   const tab = source.get("tab");
   if (tab === "diagnosis" || tab === "connections") query.set("tab", tab);
+  const report = source.get("report");
+  if (tab === "diagnosis" && report && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(report)) query.set("report", report);
   const mode = source.get("mode");
   if (mode === "login" || mode === "register") query.set("mode", mode);
   const next = source.get("next");

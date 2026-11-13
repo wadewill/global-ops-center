@@ -7,10 +7,11 @@ import styles from "./WorkspaceHeader.module.css";
 
 export type WorkspaceSection = "home" | "overview" | "diagnosis" | "connections" | "tasks";
 
-export default function WorkspaceHeader({ active, displayName, onSignOut, locale = "zh-CN" }: {
+export default function WorkspaceHeader({ active, displayName, onSignOut, loginReturnTo, locale = "zh-CN" }: {
   active: WorkspaceSection;
   displayName?: string;
   onSignOut?: () => void;
+  loginReturnTo?: string | null;
   locale?: Locale;
 }) {
   const en = locale === "en";
@@ -24,8 +25,9 @@ export default function WorkspaceHeader({ active, displayName, onSignOut, locale
     { id: "connections", label: t("API 连接", "API links"), href: `${base}?tab=connections` },
     { id: "tasks", label: t("任务中心", "Tasks"), href: `${base}/tasks` },
   ];
-  const loginHref = active === "tasks" ? `${base}?mode=login&next=${encodeURIComponent(`${base}/tasks`)}` : active === "diagnosis" || active === "connections" ? `${base}?tab=${active}&mode=login` : `${base}?mode=login`;
-  return <header className={styles.header}>
+  const returnTo = loginReturnTo && [base, `${base}/tasks`, `${base}?tab=diagnosis`, `${base}?tab=connections`].includes(loginReturnTo) ? loginReturnTo : active === "tasks" ? `${base}/tasks` : null;
+  const loginHref = returnTo ? `${base}?mode=login&next=${encodeURIComponent(returnTo)}` : active === "diagnosis" || active === "connections" ? `${base}?tab=${active}&mode=login` : `${base}?mode=login`;
+  return <header className={styles.header} lang={locale}>
     <div className={styles.utility}><div><span>{t("ListingScore 商家服务", "ListingScore merchant services")}</span><nav aria-label={t("快捷导航", "Quick navigation")}><Link href={home}>{t("返回产品首页", "Product home")}</Link><Link href={`${home}#help`}>{t("帮助中心", "Help")}</Link><LocaleLink locale={en ? "zh-CN" : "en"} /></nav></div></div>
     <div className={styles.masthead}>
       <Link href={home} className={styles.logo} aria-label={t("ListingScore 产品首页", "ListingScore product home")}><b aria-hidden="true">LS</b><span>ListingScore<small>{t("商品检查 · 运营工具", "PRODUCT CHECKS · MERCHANT TOOLS")}</small></span></Link>

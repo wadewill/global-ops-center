@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function ChineseLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div lang="zh-CN">{children}</div>;
 }

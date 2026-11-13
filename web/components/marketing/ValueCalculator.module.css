@@ -32,7 +32,7 @@
 .change { font-size: 11px; color: #7b6b5e; margin: 0 0 18px; line-height: 1.7; }
 .change b { color: #b33c1d; font-weight: 600; }
 .total { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: #ffeadc; color: #693b25; border: 1px solid #ffddc8; border-radius: 4px; padding: 13px 15px; }
-.total > span { font-size: 12px; flex-shrink: 0; }
+.total > span { font-size: 12px; min-width: 0; line-height: 1.5; }
 .total strong { color: #d7441f; font-size: 32px; font-weight: 700; letter-spacing: -.6px; overflow-wrap: anywhere; text-align: right; }
 .total small { font-size: 12px; font-weight: 400; }
 .breakdown { margin: 18px 0 10px; font-size: 12px; }
@@ -68,6 +68,8 @@
   .fields { gap: 16px 12px; }
   .field label { font-size: 12px; }
   .inputWrap input { font-size: 17px; padding: 10px 9px; }
-  .total { padding: 12px 11px; gap: 9px; }
-  .total strong { font-size: 28px; }
+  .total { padding: 12px 11px; gap: 9px; flex-wrap: wrap; }
+  .total strong { font-size: 28px; margin-left: auto; }
+  .breakdown > div { flex-wrap: wrap; gap: 5px 14px; }
+  .breakdown dd { margin-left: auto; }
 }

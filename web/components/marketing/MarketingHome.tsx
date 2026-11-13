@@ -5,6 +5,7 @@ import Link from "next/link";
 import ValueCalculator from "./ValueCalculator";
 import { marketingText, type MarketingLocale } from "./marketing-text";
 import styles from "./MarketingHome.module.css";
+import { fieldLabel } from "../../lib/workspace-labels";
 
 function ServiceIcon({ kind }: { kind: "check" | "report" | "task" | "api" }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
@@ -80,7 +81,7 @@ const faqs = [
 
   return <div id="home" className={styles.page} lang={locale}>
     <a className={styles.skip} href="#main">{t("跳到正文")}</a>
-    <div className={styles.utility}><div><span>{t("ListingScore 商家服务")}</span><nav aria-label={t("快捷导航")}><Link href={workspaceHref}>{t("我的个人中心")}</Link><a href="#help">{t("帮助中心")}</a><Link href={locale === "en" ? "/" : "/en/product"} lang={locale === "en" ? "zh-CN" : "en"}>{locale === "en" ? "中文" : "English"}</Link></nav></div></div>
+    <div className={styles.utility}><div><span>{t("ListingScore 商家服务")}</span><nav aria-label={t("快捷导航")}><Link href={workspaceHref}>{t("我的个人中心")}</Link><a href="#help">{t("帮助中心")}</a><Link href={locale === "en" ? "/" : "/en/product"} lang={locale === "en" ? "zh-CN" : "en"} hrefLang={locale === "en" ? "zh-CN" : "en"}>{locale === "en" ? "中文" : "English"}</Link></nav></div></div>
     <header className={styles.header}>
       <Link href={homeHref} className={styles.logo} aria-label={t("ListingScore 产品首页")}><b>LS</b><span>ListingScore<small>{t("商品检查 · 运营工具")}</small></span></Link>
       <div className={styles.searchArea}>
@@ -102,19 +103,19 @@ const faqs = [
           <div className={styles.bannerCopy}><p>{t("商品上新 · 准备专区")}</p><h1>{t("上架前先检查，")}<br />{t("少一点返工。")}</h1><span>{t("价格、图片链接、SKU、变体信息")}<br />{t("把容易遗漏的问题，一次理清。")}</span><Link href={`${workspaceHref}?tab=diagnosis`} className={styles.primary}>{t("免费检查我的商品")}</Link><small>{t("当前免费体验，无需绑定支付方式")}</small></div>
           <div className={styles.bannerImage}><img src="/images/storefront/sneaker.webp" alt={t("米白运动鞋商品陈列示意")} width="500" height="500" fetchPriority="high" /><span>{t("商品示意 · 变体信息检查")}</span></div>
         </section>
-        <aside className={styles.welcome}><span className={styles.avatar} aria-hidden="true">LS</span><h2>{t("Hi，欢迎来到 ListingScore")}</h2><p>{t("你的商品，上架准备好了吗？")}</p><Link href={workspaceHref} className={styles.primary}>{t("进入工作空间")}</Link><a href="#catalog" className={styles.outline}>{t("先看看检查示例")}</a><div className={styles.welcomeFacts}><span><b>{t("检查")}</b><small>{t("发现问题")}</small></span><span><b>{t("建议")}</b><small>{t("明确动作")}</small></span><span><b>{t("任务")}</b><small>{t("跟进处理")}</small></span></div><small className={styles.notice}>{t("当前不会自动修改店铺商品")}</small></aside>
+        <aside className={styles.welcome}><span className={styles.avatar} aria-hidden="true">LS</span><h2>{t("欢迎来到 ListingScore")}</h2><p>{t("你的商品，上架准备好了吗？")}</p><Link href={workspaceHref} className={styles.primary}>{t("进入工作空间")}</Link><a href="#catalog" className={styles.outline}>{t("先看看检查示例")}</a><div className={styles.welcomeFacts}><span><b>{t("检查")}</b><small>{t("发现问题")}</small></span><span><b>{t("建议")}</b><small>{t("明确动作")}</small></span><span><b>{t("任务")}</b><small>{t("跟进处理")}</small></span></div><small className={styles.notice}>{t("当前不会自动修改店铺商品")}</small></aside>
       </div>
 
       <div className={styles.serviceStrip}><span><b>{t("商品信息检查")}</b><small>{t("先发现，后上架")}</small></span><span><b>{t("修复建议清晰")}</b><small>{t("知道下一步怎么改")}</small></span><span><b>{t("报告私密保存")}</b><small>{t("回看每一次诊断")}</small></span><span><b>{t("当前免费体验")}</b><small>{t("无自动订阅扣费")}</small></span></div>
 
       <section id="catalog" className={styles.catalog}>
         <div className={styles.sectionHeading}><div><h2>{t("商品检查示例")}</h2><p>{t("点击商品卡片，看看问题出在哪、建议怎么改。")}</p></div><span className={styles.demoLabel}>{t("示意商品 · 非实物售卖")}</span></div>
-        <div className={styles.categoryTabs} aria-label={t("示例类目筛选")}>{categories.map(item => <button key={item} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}<span role="status">{query ? `“${query}” · ` : ""}{visible.length}{t("个示例")}</span>{query && <button className={styles.clear} onClick={() => {setQuery("");setDraft("");}}>{t("清除搜索")}</button>}</div>
+        <div className={styles.categoryTabs} aria-label={t("示例类目筛选")}>{categories.map(item => <button key={item} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}<span role="status">{query ? `“${query}” · ` : ""}{locale === "en" ? `${visible.length} ${visible.length === 1 ? "example" : "examples"}` : `${visible.length} 个示例`}</span>{query && <button className={styles.clear} onClick={() => {setQuery("");setDraft("");}}>{t("清除搜索")}</button>}</div>
         <div className={styles.catalogGrid}>
           <div className={styles.products}>
             {visible.map(item => <article className={styles.productCard} key={item.id}>
               <div className={styles.productImage}><img src={item.image} alt={item.alt} width="400" height="400" loading="lazy" /><span>{item.tag}</span></div>
-              <div className={styles.productInfo}><small>{item.category}{t("· 示例商品")}</small><h3>{item.name}</h3><p className={styles.issue}><i aria-hidden="true">!</i>{item.issue}</p><div className={styles.productMeta}><span>{item.severity}</span><small>{t("1 项示例问题")}</small></div><details><summary>{t("查看问题与修复建议")}<span aria-hidden="true">＋</span></summary><div className={styles.repair}><p><b>{t("问题字段：")}</b>{item.field}</p><p><b>{t("当前示例值：")}</b>{item.value}</p><p>{item.action}</p><Link href={`${workspaceHref}?tab=diagnosis`}>{t("检查我自己的商品 →")}</Link></div></details></div>
+              <div className={styles.productInfo}><small>{item.category}{t("· 示例商品")}</small><h3>{item.name}</h3><p className={styles.issue}><i aria-hidden="true">!</i>{item.issue}</p><div className={styles.productMeta}><span>{item.severity}</span><small>{t("1 项示例问题")}</small></div><details><summary>{t("查看问题与修复建议")}<span aria-hidden="true">＋</span></summary><div className={styles.repair}><p><b>{t("问题字段：")}</b>{fieldLabel(item.field, locale)}</p><p><b>{t("当前示例值：")}</b>{item.value}</p><p>{item.action}</p><Link href={`${workspaceHref}?tab=diagnosis`}>{t("检查我自己的商品 →")}</Link></div></details></div>
             </article>)}
             {!visible.length && <div className={styles.noResults}><h3>{t("没有找到匹配的商品示例")}</h3><p>{t("可以试试“运动鞋”“价格”或“GTIN”。搜索仅覆盖这里的演示商品。")}</p><button onClick={() => {setCategory(t("全部商品"));setQuery("");setDraft("");}}>{t("查看全部示例")}</button></div>}
           </div>
@@ -136,6 +137,6 @@ const faqs = [
       <section id="help" className={styles.help}><div className={styles.sectionHeading}><h2>{t("使用前，你可能想了解")}</h2><span>{t("帮助中心")}</span></div><div className={styles.faqGrid}>{faqs.map(([question,answer]) => <details key={question}><summary>{question}<span aria-hidden="true">＋</span></summary><p>{answer}</p></details>)}</div></section>
       <section className={styles.bottomBanner}><div><h2>{t("下一次上新，先把商品检查一遍。")}</h2><p>{t("找到问题，拿到建议，开始处理。")}</p></div><Link href={`${workspaceHref}?tab=diagnosis`} className={styles.primary}>{t("免费检查我的商品")}</Link></section>
     </main>
-    <footer className={styles.footer}><div><Link href={homeHref} className={styles.footerLogo}>ListingScore</Link><span>{t("商品检查 · 运营工具")}</span><nav aria-label={t("页脚导航")}><Link href={workspaceHref}>{t("中文个人中心")}</Link><Link href={locale === "en" ? "/zh" : "/en"}>{locale === "en" ? "中文工作空间" : "English workspace"}</Link><a href="#help">{t("使用帮助")}</a><a href="#home">{t("返回顶部 ↑")}</a></nav></div><p>{t("当前提供商品诊断与修复任务管理。平台自动同步、团队分派与在线订阅仍在规划中。")}</p></footer>
+    <footer className={styles.footer}><div><Link href={homeHref} className={styles.footerLogo}>ListingScore</Link><span>{t("商品检查 · 运营工具")}</span><nav aria-label={t("页脚导航")}><Link href={workspaceHref}>{t("中文个人中心")}</Link><Link href={locale === "en" ? "/zh" : "/en"} lang={locale === "en" ? "zh-CN" : "en"} hrefLang={locale === "en" ? "zh-CN" : "en"}>{locale === "en" ? "中文工作空间" : "English workspace"}</Link><a href="#help">{t("使用帮助")}</a><a href="#home">{t("返回顶部 ↑")}</a></nav></div><p>{t("当前提供商品诊断与修复任务管理。平台自动同步、团队分派与在线订阅仍在规划中。")}</p></footer>
   </div>;
 }

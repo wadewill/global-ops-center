@@ -269,6 +269,8 @@
   .footer nav { width: 100%; margin: 0; gap: 17px; font-size: 10px; }
 }
 @media (max-width: 380px) {
+  .navBar>nav { gap: 14px; justify-content: flex-start; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+  .navBar>nav>a { flex: 0 0 auto; white-space: nowrap; }
   .bannerCopy { padding-left: 16px; }
   .bannerCopy h1 { font-size: 22px; }
   .bannerCopy>span { font-size: 9px; }

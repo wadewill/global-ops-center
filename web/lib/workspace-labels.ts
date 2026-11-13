@@ -14,10 +14,12 @@ export function workspaceLabel(value: string, locale: AppLocale): string {
   return labels[value]?.[locale === "zh-CN" ? 0 : 1] ?? (locale === "zh-CN" ? "其他" : "Other");
 }
 
-const fields: Record<string, string> = {
-  sku: "商品 SKU", title: "商品标题", description: "商品描述", price: "价格", image_link: "图片链接", imageUrl: "图片链接", image_url: "图片链接",
-  availability: "库存状态", inventory: "库存", brand: "品牌", gtin: "商品条码 GTIN", item_group_id: "变体分组", size: "尺码", color: "颜色", link: "商品链接",
+const fields: Record<string, readonly [string, string]> = {
+  sku: ["商品 SKU", "SKU"], title: ["商品标题", "Product title"], description: ["商品描述", "Description"], price: ["价格", "Price"],
+  image_link: ["图片链接", "Image URL"], imageUrl: ["图片链接", "Image URL"], image_url: ["图片链接", "Image URL"],
+  availability: ["库存状态", "Availability"], inventory: ["库存", "Inventory"], brand: ["品牌", "Brand"], gtin: ["商品条码 GTIN", "GTIN"],
+  item_group_id: ["变体分组", "Variant group"], size: ["尺码", "Size"], color: ["颜色", "Color"], link: ["商品链接", "Product URL"],
 };
 export function fieldLabel(value: string, locale: AppLocale): string {
-  return locale === "zh-CN" ? fields[value] ?? value : value;
+  return fields[value]?.[locale === "zh-CN" ? 0 : 1] ?? value;
 }

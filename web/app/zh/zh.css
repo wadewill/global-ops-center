@@ -46,7 +46,7 @@
 .zh-title button, .zh-page-title a { border: 0; background: none; color: #c84824; font-size: 12px; font-weight: 500; text-decoration: none; }
 .zh-title button { padding: 7px 0; white-space: nowrap; }
 .zh-title button:hover, .zh-page-title a:hover { text-decoration: underline; }
-.zh-report { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 17px 0; border-bottom: 1px solid #eee; }
+.zh-report { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: 12px; padding: 17px 0; border-bottom: 1px solid #eee; }
 .zh-report:last-child { border-bottom: 0; }
 .zh-report strong, .zh-report span { display: block; font-size: 13px; overflow-wrap: anywhere; }
 .zh-report strong { font-weight: 500; }
@@ -126,6 +126,32 @@
 .zh-session-error .zh-primary { margin-top: 15px; }
 .zh-data-error { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 .zh-data-error button { padding: 5px 10px; border: 1px solid #dca598; border-radius: 3px; background: #fff; color: #a4332b; font-size: 12px; }
+.zh-text-link { display: inline-flex; align-items: center; padding: 5px 0; border: 0; background: none; color: #c84824; font-size: 12px; line-height: 1.6; text-decoration: none; text-align: left; }
+.zh-text-link:hover:not(:disabled) { text-decoration: underline; }
+.zh-text-link:disabled { opacity: .55; }
+.zh-report-link { color: #333; font-size: 13px; font-weight: 500; text-decoration: none; overflow-wrap: anywhere; }
+.zh-report-link:hover { color: #c84824; text-decoration: underline; }
+.zh-report>div { min-width: 0; }
+.zh-report>.zh-text-link { white-space: nowrap; }
+.zh-page-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 24px; margin-top: 14px; }
+.zh-page-title .zh-page-actions a { margin: 0; }
+.zh-result-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid #eee; padding-bottom: 12px; }
+.zh-result .zh-result-actions h3 { margin: 0; padding: 0; border: 0; }
+.zh-roadmap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 17px; color: #777; font-size: 11px; align-items: center; }
+.zh-roadmap>b { font-weight: 500; }
+.zh-roadmap>span { padding: 5px 8px; border: 1px solid #e7e7e7; border-radius: 3px; background: #f8f8f8; }
+.zh-count { padding: 5px 9px; border: 1px solid #f0d6c9; border-radius: 3px; background: #fff5ee; color: #c76037; font-size: 12px; }
+.zh-connection-info { min-width: 0; }
+.zh-connection>small { max-width: 130px; }
+.zh-connection-actions { grid-column: 2 / -1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.zh-danger-link { color: #a4332b; }
+.zh-connect-form label small { color: #888; font-size: 11px; font-weight: 400; line-height: 1.7; }
+.zh-remove-confirm { padding: 18px; margin-top: 17px; border: 1px solid #e8c7bd; border-radius: 4px; background: #fff8f4; }
+.zh-remove-confirm h3 { margin: 0 0 10px; color: #873f2b; font-size: 15px; }
+.zh-remove-confirm p { margin: 0; color: #80695e; font-size: 12px; line-height: 1.8; }
+.zh-remove-confirm strong { display: block; color: #4a3426; overflow-wrap: anywhere; }
+.zh-remove-confirm>div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 9px; margin-top: 15px; }
+.zh-remove-confirm .zh-primary { margin-top: 0; }
 @media (max-width: 900px) {
   .zh-hero { padding: 26px; }
   .zh-hero h1 { font-size: 25px; }
@@ -153,6 +179,8 @@
   .zh-title { gap: 12px; }
   .zh-title h2 { font-size: 18px; }
   .zh-title button { font-size: 11px; }
+  .zh-report { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .zh-report>.zh-text-link { grid-column: 1 / -1; justify-self: start; }
   .zh-page-title { padding: 23px 21px; margin-bottom: 15px; }
   .zh-page-title h1 { font-size: 23px; }
   .zh-empty { padding: 35px 5px; }
@@ -168,6 +196,7 @@
   .zh-connection-layout { grid-template-columns: minmax(0, 1fr); gap: 15px; }
   .zh-connection { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; }
   .zh-connection small { font-size: 9px; }
+  .zh-connection>small { max-width: 95px; }
   .zh-auth { grid-template-columns: minmax(0, 1fr); width: calc(100% - 28px); min-height: auto; margin-top: 18px; }
   .zh-auth-hero { padding: 24px; gap: 0; }
   .zh-auth-hero .zh-logo, .zh-auth-hero>small { display: none; }

@@ -32,6 +32,7 @@
 .task-action { text-align: right; }
 .task-action small { display: block; margin-bottom: 8px; color: #999; font-size: 11px; }
 .task-action select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px; background: #fff; color: #555; font-size: 12px; font-family: inherit; }
+.task-action select:disabled { background: #f5f5f5; color: #888; cursor: wait; }
 .task-empty { display: grid; justify-items: center; gap: 10px; padding: 55px 15px; text-align: center; }
 .task-empty b { font-size: 15px; font-weight: 500; }
 .task-empty span { color: #888; font-size: 12px; line-height: 1.8; }
@@ -64,9 +65,9 @@
   .task-board-head { display: block; }
   .task-board-head h2 { font-size: 18px; }
   .task-filter { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 17px; }
-  .task-filter button { padding: 8px 5px; font-size: 11px; }
+  .task-filter button { min-width: 0; padding: 8px 5px; font-size: 11px; white-space: normal; }
   .task-card { grid-template-columns: 65px minmax(0, 1fr); gap: 10px; padding: 17px 0; }
-  .task-action { display: flex; align-items: center; gap: 12px; grid-column: 2; text-align: left; }
+  .task-action { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; grid-column: 2; text-align: left; }
   .task-action small { margin: 0; }
   .task-action select { width: auto; max-width: 125px; }
   .task-copy h3 { font-size: 13px; }

@@ -1,0 +1,11 @@
+.page { min-height: 100vh; max-width: 1200px; padding: 36px 22px; margin: auto; color: #252525; }
+.brand { font-size: 24px; font-weight: 700; letter-spacing: -.8px; color: #252525; text-decoration: none; }
+.card { margin: 48px auto; max-width: 620px; padding: 48px 32px; background: #fff; border: 1px solid #e6e6e6; border-radius: 4px; text-align: center; }
+.code { font-size: 40px; font-weight: 700; color: #e54b25; }
+.card h1 { font-size: 26px; margin: 15px 0; }
+.card p { color: #777; font-size: 14px; line-height: 1.8; }
+.card nav { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
+.card a { text-decoration: none; color: #c54221; padding: 11px 15px; font-size: 13px; }
+.card .primary { color: #fff; background: #e54b25; border-radius: 3px; }
+.page a:focus-visible { outline: 2px solid #bf3518; outline-offset: 3px; }
+@media (max-width: 480px) { .card { margin-top: 30px; padding: 32px 18px; } }

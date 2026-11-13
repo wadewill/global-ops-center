@@ -63,3 +63,17 @@ test("unknown query settings are dropped rather than forwarded into a new locale
   assert.equal(localeHref("/zh", "tab=unknown&mode=reset&redirect=https%3A%2F%2Fevil.example", "en"), "/en");
   assert.equal(localeHref("/en", "mode=register&debug=true", "zh-CN"), "/zh?mode=register");
 });
+
+test("language switches keep a selected diagnosis report and discard unrelated or malformed IDs", () => {
+  const report = "3b4d89f0-469c-4d37-b881-fbd0115f8cc2";
+  const english = new URL(localeHref("/zh", `tab=diagnosis&report=${report}`, "en"), origin);
+  assert.equal(english.pathname, "/en");
+  assert.equal(english.searchParams.get("report"), report);
+  const chinese = new URL(localeHref("/en", english.search, "zh-CN"), origin);
+  assert.equal(chinese.searchParams.get("report"), report);
+  assert.equal(new URL(localeHref("/zh", `tab=connections&report=${report}`, "en"), origin).searchParams.get("report"), null);
+  for (const invalid of ["bad-id", `${report}/extra`, `https://example.test/${report}`, `${report}&next=//evil.example`]) {
+    const query = new URLSearchParams({ tab: "diagnosis", report: invalid });
+    assert.equal(new URL(localeHref("/zh", query.toString(), "en"), origin).searchParams.get("report"), null);
+  }
+});
